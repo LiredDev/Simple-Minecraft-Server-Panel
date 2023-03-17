@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/Home.css"/>
+        <title>Home</title>
+    <head>
+    
+    <body>
+        <button id="Start" onclick="start()">
+            Start
+        </button>
+        <button onclick="stop()">
+            Stop
+        </button>
+        <button onclick="restart()">
+            Restart
+        </button>
+        <div>
+            <p id="p">
+
+            </p>
+        </div>
+        <div id="bottom">
+            <textarea id="Commands"></textarea>
+            <button onclick="run()">run</button>
+        </div>
+        <script>
+            var websocket = new WebSocket("ws://localhost:8081/");
+            
+            websocket.onopen = function(event) {
+                console.log("Connected to server");
+            };
+
+            setInterval(function() {
+                websocket.send("logs");
+            }, 1000);
+
+            websocket.onmessage = function(event) {
+                if (event.data != "disable" && event.data != "logs" && event.data != "match" && event.data != "nomatch") {
+                    document.getElementById("p").innerHTML += event.data.toString();
+                    document.getElementById("bottom").scrollIntoView();
+                }
+                if (event.data == "disable") {
+                    document.getElementById("Start").disabled = true;
+                }
+            };
+
+            function start() {
+                websocket.send("start");
+            }
+            function stop() {
+                websocket.send("stop");
+            }
+            function restart() {
+                websocket.send("restart");
+            }
+            function run() {
+                websocket.send(document.getElementById("Commands").value);
+            }
+        </script>
+    </body>
+</html>
